@@ -1,0 +1,11 @@
+---
+- name: Schedule tasks
+  hosts: proxy_host
+  become: yes
+  tasks:
+    - name: Add cron job which appends the /var/log/time.log file
+      cron:
+        name: Append date result to /var/log/time.log
+        job: date >> /var/log/time.log
+        special_time: hourly
+        user: root

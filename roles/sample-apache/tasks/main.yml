@@ -1,0 +1,22 @@
+---
+- name: Install required packages
+  yum:
+    name:
+      - httpd 
+      - mod_ssl
+      - php
+      - incron
+- name: Enable Apache service and make it run on boot
+  service:
+    name: apache
+    state: started
+    enabled: yes
+
+- name: Allow incoming traffic on port 80/TCP and 443/TCP
+  ansible.posix.firewalld:
+    port: 
+      - 80/TCP
+      - 443/TCP
+    permanent: yes
+    state: enabled
+

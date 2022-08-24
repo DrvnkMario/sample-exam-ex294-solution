@@ -1,0 +1,76 @@
+---
+- name: Include variable files
+  hosts: all
+  tasks:
+  - name: Include user_list.yml file # introduces users variable
+    include_vars:
+      file: user_list.yml
+
+  - name: Include secret.yml file # file with passwords
+    include_vars:
+      file: secret.yml
+
+- name: Create users
+  become: yes
+  hosts: all
+  tasks:
+
+  - name: Create users on hosts in webservers group
+    user:
+      name: "{{ item.username }}"
+      uid: "{{ item.uid }} "
+      append: yes
+      groups: wheel
+      shell: /bin/bash
+      password: "{{ user_password | password_hash('sha512') }}"
+    loop: "{{ users }}"
+    when: "(item.uid | string).startswith('1') and inventory_hostname in groups['webservers']"
+
+  - name: Create users on hosts in database group
+    user:
+      name: "{{ item.username }}"
+      uid: "{{ item.uid }} "
+      append: yes
+      groups: wheel
+      shell: /bin/bash
+      password: "{{ user_password | password_hash('sha512') }}"
+    loop: "{{ users }}"
+    when: " (item.uid | string).startswith('2') and inventory_hostname in groups['database']"
+
+- name: Configure ssh access for users
+  hosts: all
+  become: yes
+  tasks:
+    - name: Create .ssh directory for webservers users
+      file:
+        path: /home/{{ item.username }}/.ssh/
+        state: directory
+        owner: "{{ item.username }}"
+        recurse: yes
+      loop: "{{ users }}"
+      when: " (item.uid | string).startswith('1') and inventory_hostname in groups['webservers']"
+    
+    - name: Copy public key from control node to webservers users
+      copy:
+        src: /root/.ssh/id_rsa.pub
+        dest: /home/{{ item.username }}/.ssh/authorized_keys
+        owner: "{{ item.username }}"
+      loop: "{{ users }}"
+      when: " (item.uid | string).startswith('1') and inventory_hostname in groups['webservers']"
+
+    - name: Create .ssh for database users
+      file:
+        path: /home/{{ item.username }}/.ssh/
+        state: directory
+        owner: "{{ item.username }}"
+        recurse: yes
+      loop: "{{ users }}"
+      when: " (item.uid | string).startswith('2') and inventory_hostname in groups['database']"
+
+    - name: Copy public key from control node to database users
+      copy:
+        src: /root/.ssh/id_rsa.pub
+        dest: /home/{{ item.username }}/.ssh/authorized_keys
+        owner: "{{ item.username }}"
+      loop: "{{ users }}"
+      when: " (item.uid | string).startswith('2') and inventory_hostname in groups['database']"

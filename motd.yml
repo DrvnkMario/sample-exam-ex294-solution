@@ -1,0 +1,27 @@
+---
+- name: Set motd for proxy servers
+  hosts: proxy_host
+  become: yes
+  tasks:
+  - name: Modify /etc/motd 
+    lineinfile:
+      path: /etc/motd
+      line: Welcome to HAProxy server
+
+- name: Set motd for webservers
+  hosts: webservers
+  become: yes
+  tasks:
+  - name: Modify /etc/motd 
+    lineinfile:
+      path: /etc/motd
+      line: Welcome to Apache server
+  
+- name: Set motd for database servers
+  hosts: database
+  become: yes
+  tasks:
+  - name: Modify /etc/motd 
+    lineinfile:
+      path: /etc/motd
+      line: Welcome to MySQL server

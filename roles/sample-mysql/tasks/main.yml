@@ -1,0 +1,78 @@
+---
+- name: Create primary partition 
+  parted:
+    device: /dev/sdb
+    number: 1
+    part_end: 800MiB 
+    flags: [ lvm ]
+
+- name: Create volume group called vg_database on top of /dev/sdb1
+  community.general.lvg:
+    pvs: /dev/sdb
+    vg: vg_database
+
+- name: Create logical volume lv_mysql in group vg_database 
+  community.general.lvol:
+    vg: vg_database
+    lv: lv_mysql
+    size: 512
+
+- name: Set xfs file system on lv_mysql
+  community.general.filesystem:
+    fstype: xfs
+    dev: /dev/vg_database/lv_mysql
+
+- name: Mount lv_mysql to /mnt/mysql_backups
+  ansible.posix.mount:
+    path: /mnt/mysql_backups
+    src: /dev/vg_database/lv_mysql
+    boot: yes
+    state: mounted
+    fstype: xfs
+
+- name: Add MySQL 5.7 repository
+  yum:
+    name: 
+      - http://repo.mysql.com/mysql57-community-release-el7.rpm
+    disable_gpg_check: yes
+
+- name: Generate MySQL server config from my.cnf.j2
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+
+- name: Install MySQL 5.7
+  yum:
+    name:
+      - mysql-community-server
+      - mysql-community-client
+    disable_gpg_check: yes
+
+- name: Enable MySQL on boot
+  service:
+    name: mysqld
+    enabled: yes
+    state: started
+
+- name: Include secret.yml file # file with passwords
+  include_vars:
+    file: secret.yml
+
+- name: Change MySQL root user password
+  shell: |
+    password_match=`awk '/A temporary password is generated for/ {a=$0} END{ print a }' /var/log/mysqld.log | awk '{print $(NF)}'`
+    mysql -u root -p$password_match --connect-expired-password<< EOF 
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ database_password }}'; 
+    flush privileges; 
+    exit;
+    EOF
+- name: Restart MySQL server
+  service:
+    name: mysqld
+    state: restarted
+
+- name: Open traffic incoming to 3306 tcp port in firewall
+  ansible.posix.firewalld:
+    port: 3306/tcp
+    permanent: yes
+    state: enabled
