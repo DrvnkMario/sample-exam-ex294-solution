@@ -1,0 +1,21 @@
+---
+- name: "Task 16: Software Packages"
+  hosts: all
+  become: yes
+  tasks:
+
+    - name: Install tcpdump and mailx on hosts in proxy_host group
+      package:
+        name:
+          - tcpdump
+          - mailx
+        state: present
+      when: inventory_hostname in groups['proxy_host']
+
+    - name: Install lsof and mailx on hosts in database group
+      package:
+        name:
+          - lsof
+          - mailx
+        state: present
+      when: inventory_hostname in groups['database']

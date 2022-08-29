@@ -1,0 +1,1 @@
+{% for hostname in vars['play_hosts'] %}{{hostvars[hostname]['ansible_fqdn']}} {% endfor %}

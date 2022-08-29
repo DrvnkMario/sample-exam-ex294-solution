@@ -66,6 +66,7 @@
     flush privileges; 
     exit;
     EOF
+  
 - name: Restart MySQL server
   service:
     name: mysqld

@@ -1,27 +1,22 @@
 ---
-- name: Set motd for proxy servers
-  hosts: proxy_host
+- name: 'Task 3: File Content'
+  hosts: all
   become: yes
   tasks:
-  - name: Modify /etc/motd 
-    lineinfile:
-      path: /etc/motd
-      line: Welcome to HAProxy server
+    - name: Modify /etc/motd for hosts in proxy_host group
+      lineinfile:
+        path: /etc/motd
+        line: Welcome to HAProxy server
+      when: inventory_hostname in groups['proxy_host']
 
-- name: Set motd for webservers
-  hosts: webservers
-  become: yes
-  tasks:
-  - name: Modify /etc/motd 
-    lineinfile:
-      path: /etc/motd
-      line: Welcome to Apache server
-  
-- name: Set motd for database servers
-  hosts: database
-  become: yes
-  tasks:
-  - name: Modify /etc/motd 
-    lineinfile:
-      path: /etc/motd
-      line: Welcome to MySQL server
+    - name: Modify /etc/motd for hosts in webservers group
+      lineinfile:
+        path: /etc/motd
+        line: Welcome to Apache server
+      when: inventory_hostname in groups['webservers']
+
+    - name: Modify /etc/motd for hosts in database group
+      lineinfile:
+        path: /etc/motd
+        line: Welcome to MySQL server
+      when: inventory_hostname in groups['database']

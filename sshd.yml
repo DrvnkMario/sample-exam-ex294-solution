@@ -6,15 +6,15 @@
     - name: Set banner path to /etc/motd
       lineinfile:
         path: /etc/ssh/sshd_config
-        line: Banner              /etc/motd
+        line: Banner  /etc/motd
         
     - name: Disable X11Forwarding
       lineinfile:
         path: /etc/ssh/sshd_config
-        line: X11Forwarding       no
+        line: X11Forwarding no
 
     - name: Set MaxAuthTries
       lineinfile:
         path: /etc/ssh/sshd_config
-        line: MaxAuthTries        3
+        line: MaxAuthTries  3
       

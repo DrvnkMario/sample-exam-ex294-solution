@@ -1,0 +1,7 @@
+---
+- name: 'Task 15: Work with Ansible Facts'
+  hosts: database
+  tasks:
+    - name: Create server_role fact
+      set_fact:
+        server_role: mysql

@@ -5,18 +5,33 @@
       - httpd 
       - mod_ssl
       - php
-      - incron
+
 - name: Enable Apache service and make it run on boot
   service:
-    name: apache
+    name: httpd
     state: started
     enabled: yes
 
-- name: Allow incoming traffic on port 80/TCP and 443/TCP
+- name: Allow incoming traffic on port 80/TCP
   ansible.posix.firewalld:
-    port: 
-      - 80/TCP
-      - 443/TCP
+    port: 80/tcp
     permanent: yes
     state: enabled
 
+- name: Allow incoming traffic on port 443/TCP
+  ansible.posix.firewalld:
+    port: 443/tcp
+    permanent: yes
+    state: enabled
+
+# - name: Configure restart of apache service after modification of /home/573855.cloudwaysapps.com/hfjzxghgzg/public_html/html/index.html file
+  # to do
+- name: Create /home/573855.cloudwaysapps.com/hfjzxghgzg/public_html/html directory
+  file:
+    path: /home/573855.cloudwaysapps.com/hfjzxghgzg/public_html/html
+    state: directory
+
+- name: Create /home/573855.cloudwaysapps.com/hfjzxghgzg/public_html/html/index.html from template
+  template:
+    src: index.html.j2
+    dest: /home/573855.cloudwaysapps.com/hfjzxghgzg/public_html/html/index.html

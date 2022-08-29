@@ -1,0 +1,20 @@
+---
+# - name: Configure proxy servers 
+#   hosts: proxy_host
+#   become: yes
+#   vars:
+#     haproxy_backend_servers: 'webservers'
+#   roles: 
+#     - role: geerlingguy.haproxy
+#     
+# This .haproxy role is broken. To fix later
+
+- name: Configure firewall
+  hosts: proxy_host
+  become: yes
+  tasks:
+    - name: Allow incoming traffic on port TCP 80
+      ansible.posix.firewalld:
+        port: 80/tcp
+        permanent: yes
+        state: enabled

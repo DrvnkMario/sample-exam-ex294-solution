@@ -1,0 +1,7 @@
+---
+- name: "Task 17: Services"
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Set default boot target to multi-user
+      shell: systemctl set-default multi-user.target

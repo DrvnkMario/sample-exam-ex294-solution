@@ -1,0 +1,17 @@
+--- 
+- name: 'Task 14: Use Archiving'
+  hosts: database
+  become: yes
+  tasks:
+    - name: Create database_list.txt file
+      lineinfile:
+        create: yes
+        line: dev,test,qa,prod
+        path: /mnt/mysql_backups/database_list.txt
+
+    - name: Create gzip archive of database_list.txt
+      community.general.archive:
+        path: /mnt/mysql_backups/database_list.txt
+        dest: /mnt/mysql_backups/archive.gz
+        format: gz
+    
